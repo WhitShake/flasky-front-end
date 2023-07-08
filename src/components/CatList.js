@@ -3,7 +3,7 @@ import Cat from "./Cat";
 import PropTypes from 'prop-types';
 
                 /*({props})*/
-const CatList = ({ catData, onPetCat }) => {
+const CatList = ({ catData, petCat }) => {
     // defining the function VVV
     const getCatListJSX = (cats) => { /*cats is a variable for catData, so calling cats is the same as calling catData */
         // VV basically "for cat in cats" aka for cat in catDATA list of objects, stored in App
@@ -14,12 +14,13 @@ const CatList = ({ catData, onPetCat }) => {
                 <Cat 
                     id={cat.id}
                     name={cat.name}
-                    caretaker={cat.caretaker}
+                    // caretaker={cat.caretaker}
                     color={cat.color}
                     personality={cat.personality}
                     key={cat.id}
                     petCount = {cat.petCount}
-                    onPetCat={onPetCat}
+                    // onPetCat={onPetCat}
+                    petCat={petCat}
                 />
             );
         });
@@ -39,14 +40,15 @@ CatList.propTypes = {
             {
             id: PropTypes.number.isRequired,
             name: PropTypes.string.isRequired,
-            caretaker: PropTypes.string.isRequired,
+            // caretaker: PropTypes.string.isRequired,
             color: PropTypes.string.isRequired,
             personality: PropTypes.string.isRequired,
             petCount: PropTypes.number.isRequired,
             }
         )
     ).isRequired,
-    onPetCat: PropTypes.func.isRequired,
+    petCat: PropTypes.func.isRequired
+    // onPetCat: PropTypes.func.isRequired,
 };
 
 export default CatList; 
