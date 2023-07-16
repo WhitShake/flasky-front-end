@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import './App.css';
 import CatList from './components/CatList';
+import NewCatForm from './components/NewCatForm';
 import axios from "axios";
 
 // const DATA = [
@@ -30,61 +31,86 @@ import axios from "axios";
 //   },
 // ];
 
-const kBaseurl = "http://127.0.0.1:8000";
+const kBaseUrl = "http://127.0.0.1:8000";
 
 // This function returns all the data, including the list of cats
 // This makes it possible for other helper functions to pull out different parts from this return value
 // For example we might want a list of all the personalities only, we could write a helper function to access that part of this returned data
 const getAllCats = () => {
   return axios
-  .get(`${kBaseurl}/cats`)
-    .then(response => {
-      console.log(response.data)
+    .get(`${kBaseUrl}/cats`)
+    .then((response) => {
+      console.log(response.data);
       // Changing original return statement to add .map and calling the convertFromApi function
       // within it to repackage the pet_count variable to camelcase to be appropriate for JS
       // return response.data;
       return response.data.map(convertFromApi);
     })
-    .catch(error => {
-      console.log(error)
-    })
+    .catch((error) => {
+      console.log(error);
+    });
 };
 
 const petCatApi = (id) => {
   return axios
-  .patch(`${kBaseurl}/cats/${id}/pet`)
-    .then(response => {
+    .patch(`${kBaseUrl}/cats/${id}/pet`)
+    .then((response) => {
       return convertFromApi(response.data);
     })
-    .catch(error => {
+    .catch((error) => {
       console.log(error);
     });
-  };
+};
+
 
 // Add caretaker back in to each of these consts when I add it back to cat and catlist
 // This is repackaging pet_count as camelcase petCount
 const convertFromApi = (apiCat) => {
-  const {id, name, color, personality, pet_count} = apiCat;
-  const newCat = {id, name, color, personality, petCount: pet_count};
-  return newCat
+  const { id, name, color, personality, pet_count } = apiCat;
+  const newCat = { id, name, color, personality, petCount: pet_count };
+  return newCat;
 };
 
 const App = () => {
-
   const [catData, setCatData] = useState([]);
 
   // This function accesses the list of cats from the data returned by getAllCats and sets it as the catData state
   // It's done in two steps like this to maintain single responsibility
+  const calcTotalPets = (catData) => {
+    let initial_val = 0;
+    return catData.reduce((total, cat) => {
+      return total + cat.petCount;
+    }, initial_val);
+  };
+
+  const totalPetTally = calcTotalPets(catData);  
+  
   const fetchCats = () => {
-    getAllCats()
-      .then((cats) => {
-        setCatData(cats);
-      });
+    getAllCats().then((cats) => {
+      console.log(cats);
+      setCatData(cats);
+    });
   };
 
   useEffect(() => {
     fetchCats();
   }, []);
+
+
+  const onHandleSubmit = (data) => {
+    axios.post(`${kBaseUrl}/cats`, data)
+      .then((response) => {
+        setCatData((prevCats) => [convertFromApi(response.data), ...prevCats]);
+      })
+      .catch((e) => console.log(e));
+  };
+  // const onHandleSubmit = (data) => {
+  //   axios.post(`${kBaseUrl}/cats`, data)
+  //     .then((response) => {
+  //       setCatData((prevCats) => [convertFromApi(response.data), ...prevCats]);
+  //     })
+  //     .catch((e) => console.log(e));
+  // };
 
   const updateCat = (id) => {
     petCatApi(id)
@@ -118,14 +144,6 @@ const App = () => {
   // };
 
   // reduce - 
-  const calcTotalPets = (catData) => {
-    let initial_val = 0;
-    return catData.reduce((total, cat) => {
-      return total + cat.petCount;
-    }, initial_val);
-  }
-
-  const totalPetTally = calcTotalPets(catData);
 
   return (
     <div className="App">
@@ -134,6 +152,9 @@ const App = () => {
         <h2>Total Number of Pets Across all Kitties: {totalPetTally}</h2>
       </header>
       <main>
+        <NewCatForm
+          onHandleSubmit={onHandleSubmit}
+        />
         <CatList 
         catData={catData}
         // onPetCat={petCat}
